@@ -9,6 +9,8 @@
       class="elevation-1"
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
+      :loading="loading"
+      loading-text="Updating the result..."
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -98,8 +100,10 @@ export default {
     },
   },
   mounted() {
+    this.loading = true;
     axios.get(this.url + "teams").then((res) => {
       this.matchScores = res.data;
+      this.loading = false;
     });
   },
   data: () => ({
@@ -107,6 +111,7 @@ export default {
     singleSelect: false,
     dialog1: false,
     sortBy: "score",
+    loading: false,
     sortDesc: true,
     selected: [],
     radioGroup: "",
@@ -134,7 +139,9 @@ export default {
   }),
   methods: {
     save() {
+      this.loading = true;
       axios.post(this.url + "addNewTeam", this.editedItem).then((res) => {
+        this.loading = false;
         this.matchScores = res.data;
       });
       this.close();
@@ -153,8 +160,10 @@ export default {
       } else {
         payload.ties = this.selected.map((v) => v.team_name);
       }
+      this.loading = true;
       axios.post(this.url + "matchResult", payload).then((res) => {
         this.matchScores = res.data;
+        this.loading = false;
       });
       this.close1();
     },
