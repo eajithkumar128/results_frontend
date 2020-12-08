@@ -14,6 +14,7 @@
       :search="search"
       fixed-header
       height="500px"
+      :items-per-page="20"
       light
       flat
     >
