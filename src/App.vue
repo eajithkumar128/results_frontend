@@ -2,7 +2,7 @@
   <v-app>
     <div>
       <ul>
-        <li><a class="active" href="#">MATCH RESULTS</a></li>
+        <li><a class="active" href="#">Hacker Premier League</a></li>
 
         <li style="float: right">
           <a
