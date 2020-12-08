@@ -15,6 +15,7 @@
       fixed-header
       height="500px"
       light
+      flat
     >
       <template v-slot:top>
         <v-toolbar flat>
