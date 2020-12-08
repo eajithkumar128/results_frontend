@@ -11,6 +11,10 @@
       :sort-desc.sync="sortDesc"
       :loading="loading"
       loading-text="Updating the result..."
+      :search="search"
+      fixed-header
+      height="500px"
+      light
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -19,9 +23,22 @@
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="success" class="mb-2" v-bind="attrs" v-on="on">
-                New Team
-              </v-btn>
+              <v-row>
+                <v-col cols="9">
+                  <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="3" float="right">
+                  <v-btn color="success" class="mb-2" v-bind="attrs" v-on="on">
+                    New Team
+                  </v-btn>
+                </v-col>
+              </v-row>
             </template>
             <v-card>
               <v-card-title>
@@ -113,6 +130,7 @@ export default {
     sortBy: "score",
     loading: false,
     sortDesc: true,
+    search: "",
     selected: [],
     radioGroup: "",
     headers: [
