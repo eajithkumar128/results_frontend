@@ -101,6 +101,15 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-snackbar v-model="snackbar">
+      {{ text }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -129,6 +138,8 @@ export default {
     dialog1: false,
     sortBy: "score",
     loading: false,
+    snackbar: false,
+    text: "",
     sortDesc: true,
     search: "",
     selected: [],
@@ -156,12 +167,22 @@ export default {
     dialog: false,
   }),
   methods: {
+    showErrorMessage(msg) {
+      this.loading = false;
+      this.snackbar = true;
+      this.text = msg;
+    },
     save() {
       this.loading = true;
-      axios.post(this.url + "addNewTeam", this.editedItem).then((res) => {
-        this.loading = false;
-        this.matchScores = res.data;
-      });
+      axios
+        .post(this.url + "addNewTeam", this.editedItem)
+        .then((res) => {
+          this.loading = false;
+          this.matchScores = res.data;
+        })
+        .catch((err) => {
+          this.showErrorMessage(err.response.data.message);
+        });
       this.close();
     },
     close1() {
@@ -179,10 +200,15 @@ export default {
         payload.ties = this.selected.map((v) => v.team_name);
       }
       this.loading = true;
-      axios.post(this.url + "matchResult", payload).then((res) => {
-        this.matchScores = res.data;
-        this.loading = false;
-      });
+      axios
+        .post(this.url + "matchResult", payload)
+        .then((res) => {
+          this.matchScores = res.data;
+          this.loading = false;
+        })
+        .catch((err) => {
+          this.showErrorMessage(err.response.data.message);
+        });
       this.close1();
     },
     close() {
