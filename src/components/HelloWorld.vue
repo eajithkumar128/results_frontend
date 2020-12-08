@@ -1,58 +1,177 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+  <v-container>
+    <v-data-table
+      v-model="selected"
+      :headers="headers"
+      :items="matchScores"
+      item-key="team_name"
+      show-select
+      class="elevation-1"
+      :sort-by.sync="sortBy"
+      :sort-desc.sync="sortDesc"
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title>Match Score</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-dialog v-model="dialog" max-width="500px">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn color="success" class="mb-2" v-bind="attrs" v-on="on">
+                New Team
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>
+                <span class="headline">Add new team</span>
+              </v-card-title>
+
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col>
+                      <v-text-field
+                        v-model="editedItem.team_name"
+                        label="Team Name"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="close">
+                  Cancel
+                </v-btn>
+                <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-toolbar>
+      </template>
+    </v-data-table>
+    <v-dialog v-model="dialog1" max-width="550px">
+      <v-card>
+        <v-card-title>
+          <span class="headline"
+            >Select the winner -
+            <span class="red--text body-2"
+              >* dont select anything in case of tie *</span
+            ></span
+          >
+        </v-card-title>
+
+        <v-card-text>
+          <v-container>
+            <v-radio-group v-model="radioGroup">
+              <v-radio
+                v-for="(val, index) in selected"
+                :key="index"
+                :label="` ${val.team_name}`"
+                :value="index"
+              ></v-radio>
+            </v-radio-group>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="close1"> Cancel </v-btn>
+          <v-btn color="blue darken-1" text @click="save1"> Save </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
 <script>
+import axios from "axios";
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+  name: "HelloWorld",
+  watch: {
+    selected(val) {
+      if (val.length == 2) {
+        this.dialog1 = true;
+        this.radioGroup = -1;
+      }
+    },
+  },
+  mounted() {
+    axios.get(this.url + "teams").then((res) => {
+      this.matchScores = res.data;
+    });
+  },
+  data: () => ({
+    url: "https://cryptic-beach-94850.herokuapp.com/",
+    singleSelect: false,
+    dialog1: false,
+    sortBy: "score",
+    sortDesc: true,
+    selected: [],
+    radioGroup: "",
+    headers: [
+      {
+        text: "Team name",
+        align: "start",
+        sortable: false,
+        value: "team_name",
+      },
+      { text: "Wins", value: "wins" },
+      { text: "Loss", value: "losses" },
+      { text: "Ties", value: "ties" },
+      { text: "Score", value: "score" },
+    ],
+    editedIndex: -1,
+    editedItem: {
+      team_name: "",
+    },
+    defaultItem: {
+      team_name: "",
+    },
+    matchScores: [],
+    dialog: false,
+  }),
+  methods: {
+    save() {
+      axios.post(this.url + "addNewTeam", this.editedItem).then((res) => {
+        this.matchScores = res.data;
+      });
+      this.close();
+    },
+    close1() {
+      this.dialog1 = false;
+      this.radioGroup = "";
+      this.selected = [];
+    },
+    save1() {
+      this.dialog1 = false;
+      let payload = {};
+      if (this.radioGroup != -1) {
+        payload.winner = this.selected[this.radioGroup].team_name;
+        payload.loser = this.selected[!this.radioGroup ? 1 : 0].team_name;
+      } else {
+        payload.ties = this.selected.map((v) => v.team_name);
+      }
+      axios.post(this.url + "matchResult", payload).then((res) => {
+        this.matchScores = res.data;
+      });
+      this.close1();
+    },
+    close() {
+      this.dialog = false;
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    },
+  },
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+thead.v-data-table-header {
+  display: none;
 }
 </style>
