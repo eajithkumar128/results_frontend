@@ -42,10 +42,9 @@
               </v-row>
             </template>
             <v-card>
-              <v-card-title>
-                <span class="headline">Add new team</span>
+              <v-card-title class="headline grey lighten-2">
+                ADD NEW TEAM
               </v-card-title>
-
               <v-card-text>
                 <v-container>
                   <v-row>
@@ -71,17 +70,14 @@
         </v-toolbar>
       </template>
     </v-data-table>
-    <v-dialog v-model="dialog1" max-width="550px">
+    <v-dialog persistent v-model="dialog1" max-width="550px">
       <v-card>
-        <v-card-title>
-          <span class="headline"
-            >Select the winner -
-            <span class="red--text body-2"
-              >* dont select anything in case of tie *</span
-            ></span
-          >
+        <v-card-title class="headline grey lighten-2">
+          Select the winner
         </v-card-title>
-
+        <div class="px-6 pt-4 red--text">
+          *** Don't select anything and click save in case of tie ****
+        </div>
         <v-card-text>
           <v-container>
             <v-radio-group v-model="radioGroup">
